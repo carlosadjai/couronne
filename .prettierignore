@@ -1,0 +1,11 @@
+out
+dist
+coverage
+node_modules
+pnpm-lock.yaml
+package-lock.json
+LICENSE
+LICENSE.md
+docs/
+tsconfig.json
+tsconfig.*.json

@@ -6,14 +6,12 @@ dist/
 out/
 release/
 
-# Testing
+# Testing and coverage
 coverage/
 
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Logs and caches
+*.log*
+.eslintcache
 
 # Environment
 .env*
