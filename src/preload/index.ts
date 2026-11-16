@@ -1,22 +1,33 @@
-import { contextBridge } from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
+import { contextBridge, ipcRenderer } from 'electron'
+import { pingChannel, infoChannel } from '../shared/ipc/channels'
+import type { PingInput, PingOutput, InfoOutput } from '../shared/ipc/channels'
+import type { Result } from '../shared/ipc/contract'
 
-// Custom APIs for renderer
-const api = {}
+export interface CouronneBridgeApi {
+  app: {
+    ping: (data: PingInput) => Promise<Result<PingOutput>>
+    info: () => Promise<Result<InfoOutput>>
+  }
+}
 
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
+const api: CouronneBridgeApi = {
+  app: {
+    ping: (data: PingInput): Promise<Result<PingOutput>> => {
+      return ipcRenderer.invoke(pingChannel.name, data)
+    },
+    info: (): Promise<Result<InfoOutput>> => {
+      return ipcRenderer.invoke(infoChannel.name, {})
+    }
+  }
+}
+
 if (process.contextIsolated) {
   try {
-    contextBridge.exposeInMainWorld('electron', electronAPI)
-    contextBridge.exposeInMainWorld('api', api)
+    contextBridge.exposeInMainWorld('couronne', api)
   } catch (error) {
-    console.error(error)
+    console.error('Failed to expose Couronne API via contextBridge', error)
   }
 } else {
   // @ts-ignore (define in dts)
-  window.electron = electronAPI
-  // @ts-ignore (define in dts)
-  window.api = api
+  window.couronne = api
 }

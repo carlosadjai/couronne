@@ -90,10 +90,10 @@ code {
 
 .actions {
   display: flex;
-  padding-top: 32px;
+  padding-top: 24px;
   margin: -6px;
   flex-wrap: wrap;
-  justify-content: flex-start;
+  justify-content: center;
 }
 
 .action {
@@ -101,11 +101,12 @@ code {
   padding: 6px;
 }
 
-.action a {
+.action a,
+.action button {
   cursor: pointer;
   text-decoration: none;
   display: inline-block;
-  border: 1px solid transparent;
+  border: 1px solid var(--ev-button-alt-border);
   text-align: center;
   font-weight: 600;
   white-space: nowrap;
@@ -113,15 +114,45 @@ code {
   padding: 0 20px;
   line-height: 38px;
   font-size: 14px;
-  border-color: var(--ev-button-alt-border);
   color: var(--ev-button-alt-text);
   background-color: var(--ev-button-alt-bg);
+  transition: all 0.2s ease;
+  font-family: inherit;
 }
 
-.action a:hover {
+.action a:hover,
+.action button:hover {
   border-color: var(--ev-button-alt-hover-border);
   color: var(--ev-button-alt-hover-text);
   background-color: var(--ev-button-alt-hover-bg);
+}
+
+.action button:focus-visible,
+.action a:focus-visible {
+  outline: 2px solid #3178c6;
+  outline-offset: 2px;
+}
+
+.feedback-box {
+  margin-top: 20px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  max-width: 520px;
+  text-align: center;
+  font-size: 14px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.feedback-success {
+  background-color: rgba(46, 160, 67, 0.15);
+  border: 1px solid #2ea043;
+  color: #3fb950;
+}
+
+.feedback-error {
+  background-color: rgba(248, 81, 73, 0.15);
+  border: 1px solid #f85149;
+  color: #ff7b72;
 }
 
 .versions {
@@ -136,6 +167,7 @@ code {
   border-radius: 22px;
   background-color: #202127;
   backdrop-filter: blur(24px);
+  list-style: none;
 }
 
 .versions li {
@@ -146,9 +178,10 @@ code {
   font-size: 14px;
   line-height: 14px;
   opacity: 0.8;
-  &:last-child {
-    border: none;
-  }
+}
+
+.versions li:last-child {
+  border: none;
 }
 
 @media (max-width: 720px) {
