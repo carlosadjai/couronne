@@ -1,0 +1,81 @@
+:root,
+html[data-theme='dark'] {
+  --bg: #0f1115;
+  --surface: #171a21;
+  --border: #616d86;
+  --text: #e6e8ee;
+  --text-muted: #9aa3b2;
+  --accent: #e3b341;
+  --accent-fg: #171a21;
+  --accent-text: #e3b341;
+  --success: #3fb950;
+  --warning: #e0a32a;
+  --danger: #f85149;
+  --info: #58a6ff;
+  --focus-ring: #e3b341;
+
+  color-scheme: dark;
+}
+
+html[data-theme='light'] {
+  --bg: #fafaf7;
+  --surface: #ffffff;
+  --border: #858c98;
+  --text: #1b1e24;
+  --text-muted: #525b6a;
+  --accent: #d49b0e;
+  --accent-fg: #171a21;
+  --accent-text: #7a5200;
+  --success: #1a7f37;
+  --warning: #7f5200;
+  --danger: #cf222e;
+  --info: #0969da;
+  --focus-ring: #946600;
+
+  color-scheme: light;
+}
+
+@theme {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-text: var(--accent-text);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  --color-focus-ring: var(--focus-ring);
+
+  --font-sans: 'Inter Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --text-2xs: 0.75rem; /* 12px */
+  --text-xs: 0.8125rem; /* 13px */
+  --text-sm: 0.875rem; /* 14px */
+  --text-base: 1rem; /* 16px */
+  --text-lg: 1.25rem; /* 20px */
+  --text-xl: 1.5rem; /* 24px */
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-full: 9999px;
+
+  --transition-fast: 120ms ease;
+  --transition-normal: 160ms ease;
+  --transition-slow: 180ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
