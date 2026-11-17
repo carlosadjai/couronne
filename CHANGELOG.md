@@ -7,6 +7,12 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Corrigé
+
+- Correction de l'isolation du script preload : extraction des noms de canaux IPC (`names.ts`) sans dépendance vers le runtime Zod, garantissant l'absence de `require` externe dans l'environnement sandboxé.
+- Ajout d'un test automatisé vérifiant l'absence de `require` tiers dans le bundle du preload.
+- Correction d'une coquille orthographique dans `docs/BRIEF.md`.
+
 ### Ajouté
 
 - Noyau sécurisé Electron (Lot L1) : isolation des contextes (`contextIsolation`, `sandbox`, `webSecurity`), CSP stricte et blocage des navigations non autorisées.

@@ -224,7 +224,7 @@ Actions en cours, côté Carlos :
 
 ### Ce qui est possible, et ce qui ne l'est pas
 
-| Situation | Détectable | Empêchéable |
+| Situation | Détectable | Empêchable |
 | --- | --- | --- |
 | Arrêt thermique critique (`shutdown /s /f /t 0`) | Après coup (événement 86), et avant si la température est lisible | Non : protection matérielle immédiate, sans délai d'annulation |
 | Température ou charge élevée et soutenue | Charge processeur : oui. Température : seulement si le matériel l'expose à Windows | Oui, en réduisant la charge avant le seuil |

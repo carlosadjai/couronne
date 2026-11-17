@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { pingChannel, infoChannel } from '../shared/ipc/channels'
+import { APP_PING_CHANNEL, APP_INFO_CHANNEL } from '../shared/ipc/names'
 import type { PingInput, PingOutput, InfoOutput } from '../shared/ipc/channels'
 import type { Result } from '../shared/ipc/contract'
 
@@ -13,10 +13,10 @@ export interface CouronneBridgeApi {
 const api: CouronneBridgeApi = {
   app: {
     ping: (data: PingInput): Promise<Result<PingOutput>> => {
-      return ipcRenderer.invoke(pingChannel.name, data)
+      return ipcRenderer.invoke(APP_PING_CHANNEL, data)
     },
     info: (): Promise<Result<InfoOutput>> => {
-      return ipcRenderer.invoke(infoChannel.name, {})
+      return ipcRenderer.invoke(APP_INFO_CHANNEL, {})
     }
   }
 }
