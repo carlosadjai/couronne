@@ -96,7 +96,7 @@ function App(): ReactElement {
 
   return (
     <>
-      <img alt="Couronne Logo" className="logo" src={electronLogo} />
+      <img alt="Couronne Logo" className="logo" src={electronLogo} draggable={false} />
       <div className="creator">Couronne — Noyau Sécurisé (Lot L1)</div>
       <div className="text" data-testid="app-info">
         {appInfo ? (
