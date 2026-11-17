@@ -29,7 +29,7 @@ N'ajoute aucune autre dépendance sans la justifier en une phrase dans ton plan 
 src/
   main/       processus principal : core/ (fenêtres, tray, raccourcis, réglages, journal), platform/ (adaptateurs), ipc/
   preload/    contextBridge : API typée, rien d'autre
-  renderer/   React : ui/ (design système), shell/ (bulle, panneau, palette)
+  renderer/   React, sources sous src/renderer/src/ (structure electron-vite) : ui/ (design système), shell/ (bulle, panneau, palette)
   modules/    un dossier par outil : manifest.ts, contract.ts, service.ts, View.tsx, tests
   shared/     types, schémas Zod, constantes
 e2e/  resources/  docs/  .github/workflows/
@@ -79,6 +79,19 @@ Demande l'accord explicite de Carlos AVANT :
 - toute action sur un dossier situé en dehors de `D:\couronne-skills`.
 
 Les serveurs de dev et les tests que tu lances doivent être arrêtés à la fin de ta tâche.
+
+## Ressources et chaleur (machine de développement sensible)
+
+Le PC de Carlos est un portable qui s'éteint de force par protection thermique (événement Windows « arrêt thermique critique ») quand le processeur reste très chargé. Ménage-le :
+
+- Une seule tâche lourde à la fois : jamais de build, de tests, de serveur de dev et de tests e2e en parallèle.
+- Limite le parallélisme des outils (Vitest : 2 workers au maximum dans `vitest.config.ts`). Pas de mode watch laissé actif pour les tests ou le build.
+- Évite les compilations natives (`node-gyp`, `node-pre-gyp --fallback-to-build`) : privilégie les binaires précompilés. Si une compilation native est inévitable, demande l'accord de Carlos avant.
+- À la fin de chaque tâche, arrête tout ce que tu as lancé (serveurs de dev, watchers, processus `node` ou `electron` enfants) et vérifie qu'il n'en reste aucun.
+- N'attends jamais en boucle active et ne relance pas une commande qui a échoué plus de deux fois : arrête-toi et signale le problème.
+- Les builds multiplateformes et les tests complets sont laissés à la CI GitHub (Windows, macOS, Linux) plutôt que répétés en local.
+- Un arrêt forcé peut survenir sans préavis : fais des commits locaux fréquents sur ta branche de lot (au moins après chaque étape terminée). Si Carlos signale de la chaleur ou un arrêt, arrête immédiatement les tâches lourdes.
+- Après un redémarrage inattendu, ne reprends pas à l'aveugle : `git status`, relance lint, typecheck et tests, vérifie qu'aucun fichier n'est tronqué.
 
 ## Définition de fini d'un lot
 

@@ -19,7 +19,7 @@ Couronne est un tableau de bord de développeur, local et gratuit, qui réunit d
 - Bulle flottante, panneau, icône de barre système, raccourci global, palette Ctrl + K
 - Projets (VS Code, terminal, serveurs de dev), ports et processus
 - Utilitaires développeur, historique du presse-papiers, commandes favorites, chrono et Pomodoro
-- GitHub, Docker, testeur d'API, clés SSH, garde-fou d'arrêt (Windows d'abord)
+- GitHub, Docker, testeur d'API, clés SSH, alerte thermique et de charge (Windows d'abord)
 - Thèmes clair et sombre, français et anglais
 - Installeurs Windows, macOS et Linux avec mises à jour automatiques
 
@@ -198,52 +198,54 @@ Dix-sept lots, chacun livrable et testable seul. Un lot ne démarre que lorsque 
 | L8 Module Ports et processus | 2 | Qui occupe le port, arrêt du processus avec confirmation, liste des ports ouverts | L6 | Port 3000 occupé détecté en moins d'une seconde ; arrêt confirmé puis effectif |
 | L9 Module Utilitaires | 2 | JWT, JSON, Base64, UUID, expressions régulières, horodatages | L4 | Chaque outil fonctionne hors ligne ; JWT décodé sans envoi réseau |
 | L10 Productivité | 2 | Historique du presse-papiers (SQLite), commandes favorites, chrono et Pomodoro | L4, L6 | Historique recherchable ; favoris lancés avec confirmation ; notification de fin de minuteur |
-| L16 Garde-fou d'arrêt | 2 | Détection des arrêts et redémarrages du système, rapport de la cause du dernier arrêt, alerte, journal de l'état avant arrêt, retardement quand Windows le permet (voir la section dédiée) | L4, L6 | Un arrêt demandé normalement est détecté, notifié avec le processus à l'origine et l'état des tâches en cours ; l'utilisateur peut le laisser passer ou le retarder ; les arrêts forcés sont signalés comme non bloquables |
+| L16 Alerte thermique et garde-fou d'arrêt | 2 | Surveillance de la température et de la charge du processeur avec alertes avant la coupure thermique, rapport de la cause du dernier arrêt (journal Windows), journal de l'état avant arrêt, mode « charge lourde » qui propose de mettre en pause les serveurs de dev (voir la section dédiée) | L4, L6 | Alerte affichée avant le seuil critique quand la température est lisible, sinon alerte sur la charge soutenue ; le rapport du dernier arrêt distingue arrêt thermique, coupure et arrêt demandé ; les arrêts thermiques sont signalés comme non bloquables |
 | L11 GitHub | 3 | Connexion par flux appareil, dépôts, pull requests, état des tests, pastille d'alerte sur la bulle | L4, L5 | Jeton chiffré avec safeStorage ; test en échec visible sur la bulle |
 | L12 Docker | 3 | Conteneurs, images, démarrer, arrêter, journaux | L6 | Liste et actions fonctionnelles ; message clair si Docker est absent |
 | L13 Testeur d'API et clés SSH | 3 | Requêtes HTTP enregistrables, environnements ; liste et copie des clés SSH publiques | L4 | Requête envoyée et réponse affichée ; aucune clé privée lue ou affichée |
 | L14 Distribution | 4 | electron-builder, installeurs trois systèmes, electron-updater, workflow de release par tag | L0 à L13 | Une version taguée produit trois installeurs en brouillon sur GitHub Releases ; mise à jour testée de la version N à N+1 |
 | L15 Documentation et v1.0 | 4 | README, guide illustré FR/EN, page de présentation dédiée hébergée sur Netlify, tests manuels macOS et Linux, correctifs, publication | L14 | Checklist de recette entièrement cochée ; v1.0 publiée |
 
-## Module Garde-fou d'arrêt
+## Module Alerte thermique et garde-fou d'arrêt
 
-Couronne peut surveiller les arrêts et redémarrages du système, en informer l'utilisateur et, quand le système le permet, les retarder. Le module répond à un problème observé : le PC s'éteint seul (« Arrêt en cours ») pendant qu'Antigravity exécute du code et des tests. La cause n'est pas encore connue : le module est conçu pour la révéler et limiter les dégâts, pas pour la supposer.
+Les arrêts inopinés du PC de développement sont des arrêts thermiques critiques : le module prévient avant la coupure et en garde la trace, car il ne peut pas l'empêcher.
+
+### Diagnostic établi le 16 novembre 2026
+
+Le journal Windows enregistre 11 arrêts thermiques critiques (événement Kernel-Power 86) entre le 17 octobre et le 16 novembre : 1 le 17 octobre, 1 le 26, 1 le 28, 1 le 31, 2 le 1er novembre, 1 le 4 novembre, 2 le 11 novembre et 2 le 16 novembre. La fréquence augmente. Trois ont eu lieu de nuit (1h43, 2h00, 4h17).
+
+Chaque arrêt est exécuté par la commande `shutdown /s /f /t 0` (arrêt immédiat et forcé), lancée par `WUDFHost.exe`, l'hôte des pilotes de périphériques de Windows, sous le compte SERVICE LOCAL. Aucun service ni aucune tâche planifiée tiers n'est en cause. Les deux arrêts du 16 novembre suivent un pic de charge : une compilation native environ une minute avant le premier, l'ouverture d'Antigravity 23 secondes avant le second. La charge révèle le problème, elle n'en est pas la cause.
+
+Actions en cours, côté Carlos :
+
+- [ ] Plafonner le processeur à 85 % sur secteur (`powercfg`) et nettoyer la ventilation
+- [ ] Mesurer la température à vide et en charge (HWiNFO), noter le modèle et l'âge du portable
+- [ ] Préciser ce que faisait le PC lors des arrêts de nuit (veille dans un sac, tâche en arrière-plan)
+- [ ] Si les arrêts persistent : nettoyage et pâte thermique par un technicien
 
 ### Ce qui est possible, et ce qui ne l'est pas
 
 | Situation | Détectable | Empêchable |
 | --- | --- | --- |
-| Arrêt ou redémarrage demandé normalement (commande `shutdown`, Windows Update, un programme) | Oui, en direct | Oui, retardé : Windows affiche l'application qui bloque et laisse choisir « Arrêter quand même » |
-| Compte à rebours en cours (`shutdown /s /t …`) | Oui | Oui, annulé avec `shutdown /a` |
-| Arrêt forcé (`shutdown /f`, application qui ne répond plus après le délai) | Oui, quelques secondes avant | Non : le système termine les programmes |
-| Surchauffe, coupure d'alimentation, batterie vide, écran bleu | Non en direct, oui après coup (journal d'événements) | Non, et c'est préférable : l'arrêt protège le matériel |
+| Arrêt thermique critique (`shutdown /s /f /t 0`) | Après coup (événement 86), et avant si la température est lisible | Non : protection matérielle immédiate, sans délai d'annulation |
+| Température ou charge élevée et soutenue | Charge processeur : oui. Température : seulement si le matériel l'expose à Windows | Oui, en réduisant la charge avant le seuil |
+| Arrêt ou redémarrage demandé normalement (mise à jour, programme) | Oui, en direct | Oui, retardé ou annulé quand un délai existe (`shutdown /a`) |
+| Coupure d'alimentation, batterie vide, écran bleu | Après coup | Non |
 
 ### Ce que fait le module
 
-1. **Rapport du dernier arrêt** : au démarrage, lecture du journal d'événements Windows (événements 1074, 6008, 41 et 109) pour afficher qui a demandé l'arrêt (processus, utilisateur, motif) ou si l'arrêt était brutal (coupure, surchauffe, plantage).
-2. **Alerte en direct** : dès qu'un arrêt est annoncé, notification avec l'heure, le processus à l'origine quand il est connu, et la liste des tâches en cours (serveurs de dev, conteneurs, processus lancés par l'agent).
-3. **Retardement** : déclaration d'un motif de blocage auprès de Windows (API `ShutdownBlockReasonCreate`) tant que des tâches importantes tournent, avec un bouton « Laisser l'arrêt se faire » et un bouton « Annuler l'arrêt » (`shutdown /a` quand un compte à rebours existe).
-4. **Instantané avant l'arrêt** : écriture dans un journal local des processus actifs, de la charge processeur et mémoire, de la batterie et de la température si le système l'expose, pour comprendre la cause après le redémarrage.
-5. **Mode session d'agent** : interrupteur à activer avant de confier une tâche longue à Antigravity ; le garde-fou est armé et Couronne affiche ce qui tourne.
+1. **Rapport du dernier arrêt** : au démarrage, lecture du journal Système (événements 86, 41, 6008, 1074 et 109) pour afficher la cause : thermique, coupure ou arrêt demandé par tel processus.
+2. **Surveillance** : charge du processeur et, quand c'est possible, température, relevées à intervalle régulier. Seuils d'avertissement et de danger configurables, à calibrer sur le PC de Carlos après les mesures.
+3. **Alerte en direct** : notification et pastille sur la bulle quand la charge ou la température reste élevée, avec les processus les plus gourmands (node, electron, Antigravity).
+4. **Mode « charge lourde »** : au seuil de danger, propose de mettre en pause les serveurs de dev lancés par Couronne et rappelle d'enregistrer et de faire un commit.
+5. **Journal local** : relevé périodique (charge, température si lisible, processus principaux, secteur ou batterie) conservé dans le dossier de données, pour comprendre après coup ce qui précédait un arrêt.
+6. **Arrêts normaux** : motif de blocage déclaré à Windows (`ShutdownBlockReasonCreate`) et annulation par `shutdown /a` quand un compte à rebours existe. Ne s'applique pas aux arrêts thermiques.
 
 ### Mise en œuvre technique
 
-- **Windows** : événements de fin de session d'Electron si la version retenue les propose ; sinon petit module natif appelant l'API Windows (fenêtre cachée recevant `WM_QUERYENDSESSION`, puis `ShutdownBlockReasonCreate`). À valider par un prototype avant d'engager le lot.
-- **Journal d'événements** : lecture par PowerShell (`Get-WinEvent`) lancée depuis l'adaptateur de plateforme, normalement sans droits administrateur pour le journal Système.
-- **Linux** : verrou d'inhibition de systemd-logind. **macOS** : événement d'arrêt d'Electron, support limité.
+- **Charge** : API Node (`os`). **Température** : lecture par l'adaptateur de plateforme (WMI ou PowerShell sous Windows). Windows n'expose pas toujours les capteurs d'un portable : un prototype sur le PC de Carlos doit confirmer ce qui est lisible avant d'engager le lot. Sans température, le module se rabat sur la charge soutenue.
+- **Journal d'événements** : lecture par PowerShell (`Get-WinEvent`) depuis l'adaptateur de plateforme, sans droits administrateur pour le journal Système.
+- **Linux** : `/sys/class/thermal` et verrou d'inhibition de systemd-logind. **macOS** : support limité.
 - Tout reste local : le journal est un fichier dans le dossier de données de l'utilisateur.
-
-### Diagnostic à faire dès maintenant
-
-Le module n'arrivera qu'en phase 2. Pour identifier la cause tout de suite, dans PowerShell :
-
-```powershell
-Get-WinEvent -FilterHashtable @{LogName='System'; Id=1074,6008,41,109} -MaxEvents 15 | Format-List TimeCreated, Id, Message
-```
-
-Si un événement 1074 existe à l'heure de l'arrêt, il nomme le processus à l'origine. Si seuls les événements 41 et 6008 apparaissent, l'arrêt était brutal : alimentation, surchauffe ou matériel.
-
-**Résultat du premier diagnostic (journal du 11 novembre 2026)** : six arrêts, entre le 31 octobre et le 11 novembre, ont la même signature. `shutdown.exe` est lancé par le compte système LOCAL SERVICE, l'arrêt est marqué planifié sans motif renseigné, et il devient effectif de 20 secondes à environ 2 minutes plus tard. Ce sont donc des ordres logiciels, pas des coupures matérielles. L'initiateur réel (tâche planifiée, service ou logiciel tiers) reste à identifier : le module L16 doit enregistrer le processus parent de `shutdown.exe` au moment où il démarre.
 
 ## Processus d'implémentation
 
@@ -266,6 +268,7 @@ La règle de travail : Antigravity, l'agent de développement, conçoit et écri
 - **Tests d'abord** pour la logique métier : l'agent écrit le test, puis le code.
 - **Relecture humaine obligatoire** du diff avant fusion, surtout pour le code qui lance des processus, lit des fichiers ou manipule des secrets.
 - **Aucun secret** dans le dépôt ni dans les échanges avec l'agent. Le dépôt étant public, rien de personnel ni de secret ne doit être commité.
+- **Charge modérée** : le PC de développement est un portable qui s'éteint par surchauffe. L'agent lance une seule tâche lourde à la fois, limite le parallélisme, arrête ses processus après usage et fait des commits locaux fréquents (section « Ressources et chaleur » d'AGENTS.md).
 
 ### Git et conventions
 
@@ -337,7 +340,7 @@ Un tag de version (`v1.0.0`) déclenche GitHub Actions, qui construit les trois 
 | L'agent de développement agit sur le poste sans contrôle suffisant | Régression ou action système non voulue (suppression, arrêt, installation) | Validation demandée pour les commandes sensibles, relecture du diff à chaque lot, CI obligatoire, essai manuel sur Windows après chaque lot |
 | Disponibilité de Carlos (projets clients en parallèle) | Retards sur la feuille de route | Lots petits (2 à 4 sessions de travail), durées recalibrées après les lots L1 à L3 |
 | Limites et authentification de l'API GitHub | Module GitHub fragile | Flux appareil, cache local, gestion claire des erreurs de quota |
-| Le garde-fou d'arrêt ne peut pas empêcher un arrêt forcé ou matériel (surchauffe, coupure, écran bleu) | Fausse impression de protection, perte de travail | Diagnostic préalable dans le journal d'événements ; limites annoncées dans l'interface et la documentation ; message explicite quand l'arrêt est inévitable |
+| Le module ne peut pas empêcher un arrêt thermique critique (protection matérielle immédiate) ni une coupure | Fausse impression de protection, perte de travail | Alerte avant le seuil, repli sur la charge si la température n'est pas lisible, commits fréquents, limites annoncées dans l'interface ; la vraie solution reste le refroidissement du portable |
 
 ### Décisions
 

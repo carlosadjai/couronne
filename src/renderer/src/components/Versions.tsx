@@ -1,13 +1,17 @@
-import { useState } from 'react'
+import type { ReactElement } from 'react'
 
-function Versions(): React.JSX.Element {
-  const [versions] = useState(window.electron.process.versions)
+interface VersionsProps {
+  electronVersion?: string
+  platform?: string
+  version?: string
+}
 
+function Versions({ electronVersion, platform, version }: VersionsProps): ReactElement {
   return (
-    <ul className="versions">
-      <li className="electron-version">Electron v{versions.electron}</li>
-      <li className="chrome-version">Chromium v{versions.chrome}</li>
-      <li className="node-version">Node v{versions.node}</li>
+    <ul className="versions" aria-label="Informations système">
+      {version && <li className="app-version">Couronne v{version}</li>}
+      {electronVersion && <li className="electron-version">Electron v{electronVersion}</li>}
+      {platform && <li className="platform-version">Plateforme : {platform}</li>}
     </ul>
   )
 }

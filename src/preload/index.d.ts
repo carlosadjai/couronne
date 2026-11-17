@@ -1,8 +1,14 @@
-import { ElectronAPI } from '@electron-toolkit/preload'
+import type { PingInput, PingOutput, InfoOutput, Result } from '../shared/ipc'
+
+export interface CouronneBridgeApi {
+  app: {
+    ping: (data: PingInput) => Promise<Result<PingOutput>>
+    info: () => Promise<Result<InfoOutput>>
+  }
+}
 
 declare global {
   interface Window {
-    electron: ElectronAPI
-    api: unknown
+    couronne: CouronneBridgeApi
   }
 }
